@@ -5,8 +5,6 @@ import logging
 from datetime import datetime
 from utils.shell_ops import get_gpu_stats, get_user_gpu_usage
 from utils.db import insert_gpu_log, insert_user_gpu_log
-import daemon
-from daemon import pidfile
 
 # Setup logging
 def setup_logging():
@@ -82,7 +80,7 @@ def main():
     setup_logging()
     interval = 300  # 5 minutes in seconds
     
-    logging.info("Starting GPU logger daemon...")
+    logging.info("Starting GPU logger...")
     logging.info(f"Logging interval: {interval} seconds")
     logging.info("Logger will run indefinitely until stopped manually")
     
@@ -97,20 +95,5 @@ def main():
             logging.error(f"Error in main loop: {str(e)}")
             time.sleep(interval)
 
-def run():
-    """Run the daemon process."""
-    pid_file = '/tmp/gpu_logger.pid'
-    
-    # Create daemon context
-    context = daemon.DaemonContext(
-        working_directory=os.getcwd(),
-        umask=0o002,
-        pidfile=pidfile.TimeoutPIDLockFile(pid_file),
-    )
-    
-    # Open the daemon context and run the main function
-    with context:
-        main()
-
 if __name__ == "__main__":
-    run() 
+    main() 
