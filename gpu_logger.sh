@@ -34,6 +34,18 @@ log_gpu_usage() {
         output="$timestamp,NONE,NONE,NONE,0MiB"
     fi
 
-    # Header if not exists
+    # Header if not exists, then append output
     for file in "$daily_log" "$weekly_log" "$monthly_log"; do
+        if [ ! -f "$file" ]; then
+            echo "timestamp,user,pid,process_name,used_gpu_memory" > "$file"
+        fi
+        echo "$output" >> "$file"
+    done
+}
+
+# === MAIN LOOP ===
+while true; do
+    log_gpu_usage
+    sleep $INTERVAL
+done
 
