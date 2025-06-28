@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # === CONFIGURATION ===
-INTERVAL=5  # Interval in seconds
+INTERVAL=60  # Interval in seconds
 LOG_DIR="$(pwd)/GPU_Usage_Logs"
 mkdir -p "$LOG_DIR"
 
