@@ -2,7 +2,7 @@
 
 # === CONFIGURATION ===
 INTERVAL=5  # Interval in seconds
-LOG_DIR=~/Desktop/GPU_Usage_Logs
+LOG_DIR="$(pwd)/GPU_Usage_Logs"
 mkdir -p "$LOG_DIR"
 
 # === FUNCTIONS ===

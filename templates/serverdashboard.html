@@ -17,10 +17,10 @@
             <span>GPU Monitor</span>
         </div>
         <div class="nav-actions">
-            <!-- <a href="{{ url_for('logout') }}" class="logout-button">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </a> -->
+            <a href="{{ url_for('download_csvs') }}" class="btn btn-csv-download-nav">
+                <i class="fas fa-download"></i>
+                CSVs
+            </a>
             <a href="{{ url_for('user_utilization') }}" class="btn btn-primary">
                 <i class="fas fa-users"></i>
                 User Utilization

@@ -1,13 +1,14 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()  # This will load variables from a .env file if present
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
 from utils.shell_ops import create_user, delete_user, list_users, get_inactive_users, get_gpu_stats, get_cpu_live_info, get_user_gpu_usage  # Add new imports
 import pandas as pd
 from io import StringIO
 from datetime import datetime, timedelta
 from utils.db import insert_gpu_log, get_recent_gpu_logs, get_recent_user_gpu_logs
 import requests
+import glob
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Required for session
@@ -437,6 +438,19 @@ def all_gpu_status():
             ws_result["gpus"] = [{"status": "grey", "gpu": None} for _ in range(3)]
         results.append(ws_result)
     return jsonify(results)
+
+@app.route('/download_csvs')
+def download_csvs():
+    log_dir = os.path.join(os.getcwd(), 'GPU_Usage_Logs')
+    csv_files = []
+    if os.path.exists(log_dir):
+        csv_files = [os.path.basename(f) for f in glob.glob(os.path.join(log_dir, '*.csv'))]
+    return render_template('download_csvs.html', csv_files=csv_files)
+
+@app.route('/download_csv/<filename>')
+def download_csv_file(filename):
+    log_dir = os.path.join(os.getcwd(), 'GPU_Usage_Logs')
+    return send_from_directory(log_dir, filename, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
