@@ -47,6 +47,11 @@
                     <option value="monthly">Last Month</option>
                 </select>
             </div>
+            <div class="custom-date-range">
+                <input type="date" id="customStartDate">
+                <input type="date" id="customEndDate">
+                <button onclick="fetchCustomDateRange()">Apply</button>
+            </div>
             <div class="refresh-info" id="refreshInfo">
                 <i class="fas fa-sync-alt"></i>
                 <span>Auto-refreshing every 2s</span>
@@ -293,9 +298,13 @@
         }
 
         // Function to fetch historical data
-        async function fetchHistoricalData(timeRange) {
+        async function fetchHistoricalData(timeRange, startDate, endDate) {
+            let url = `/api/historical_gpu_stats?range=${timeRange}`;
+            if (timeRange === 'custom' && startDate && endDate) {
+                url += `&start_date=${startDate}&end_date=${endDate}`;
+            }
             try {
-                const response = await fetch(`/api/historical_gpu_stats?range=${timeRange}`);
+                const response = await fetch(url);
                 const data = await response.json();
 
                 if (response.ok) {
@@ -524,6 +533,19 @@
                 controlsDiv.appendChild(downloadButton);
                 container.appendChild(controlsDiv);
             });
+        }
+
+        async function fetchCustomDateRange() {
+            const start = document.getElementById('customStartDate').value;
+            const end = document.getElementById('customEndDate').value;
+            if (!start || !end) {
+                alert('Please select both start and end dates.');
+                return;
+            }
+            // Clear interval for live updates
+            if (updateInterval) clearInterval(updateInterval);
+            document.getElementById('refreshInfo').innerHTML = '<i class="fas fa-history"></i><span>Custom Date Range</span>';
+            await fetchHistoricalData('custom', start, end);
         }
     </script>
 

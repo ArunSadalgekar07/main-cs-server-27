@@ -243,45 +243,50 @@ def user_utilization():
 def historical_gpu_stats():
     if not session.get('logged_in'):
         return jsonify({"error": "Unauthorized"}), 401
-    
-    time_range = request.args.get('range', 'daily')  # daily, weekly, monthly
-    
-    # Convert time range to hours
-    hours = {
-        'daily': 24,
-        'weekly': 24 * 7,
-        'monthly': 24 * 30
-    }.get(time_range)
-    
-    if not hours:
-        return jsonify({"error": "Invalid time range"}), 400
-    
-    try:
-        # Get historical data from SQLite
-        logs = get_recent_gpu_logs(hours=hours)
+
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    time_range = request.args.get('range', 'daily')  # daily, weekly, monthly, custom
+
+    if time_range == 'custom' and start_date and end_date:
+        logs = get_recent_gpu_logs(start_date=start_date, end_date=end_date)
+    else:
+        # Convert time range to hours
+        hours = {
+            'daily': 24,
+            'weekly': 24 * 7,
+            'monthly': 24 * 30
+        }.get(time_range)
         
-        # Process the data
-        gpu_data = {}
-        for log in logs:
-            gpu_index, gpu_name, utilization, memory, timestamp = log
-            
-            if gpu_index not in gpu_data:
-                gpu_data[gpu_index] = {
-                    'index': gpu_index,
-                    'name': gpu_name,
-                    'timestamps': [],
-                    'utilization': [],
-                    'memory': []
-                }
-            
-            gpu_data[gpu_index]['timestamps'].append(timestamp)
-            gpu_data[gpu_index]['utilization'].append(utilization)
-            gpu_data[gpu_index]['memory'].append(memory)
+        if not hours:
+            return jsonify({"error": "Invalid time range"}), 400
         
-        return jsonify(list(gpu_data.values()))
-    
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        try:
+            # Get historical data from SQLite
+            logs = get_recent_gpu_logs(hours=hours)
+            
+            # Process the data
+            gpu_data = {}
+            for log in logs:
+                gpu_index, gpu_name, utilization, memory, timestamp = log
+                
+                if gpu_index not in gpu_data:
+                    gpu_data[gpu_index] = {
+                        'index': gpu_index,
+                        'name': gpu_name,
+                        'timestamps': [],
+                        'utilization': [],
+                        'memory': []
+                    }
+                
+                gpu_data[gpu_index]['timestamps'].append(timestamp)
+                gpu_data[gpu_index]['utilization'].append(utilization)
+                gpu_data[gpu_index]['memory'].append(memory)
+            
+            return jsonify(list(gpu_data.values()))
+        
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
 @app.route('/api/historical_user_gpu_usage')
 def historical_user_gpu_usage():

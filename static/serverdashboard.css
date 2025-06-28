@@ -582,3 +582,34 @@
         justify-content: center;
     }
 }
+
+.custom-date-range {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
+}
+
+.custom-date-range input[type="date"] {
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.custom-date-range button {
+    padding: 0.45rem 1.1rem;
+    border-radius: 6px;
+    border: none;
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.custom-date-range button:hover {
+    background: var(--primary-gradient-end);
+}
