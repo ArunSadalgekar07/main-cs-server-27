@@ -3,8 +3,8 @@ import sys
 import os
 import logging
 from datetime import datetime
-from utils.shell_ops import get_gpu_stats
-from utils.db import insert_gpu_log
+from utils.shell_ops import get_gpu_stats, get_user_gpu_usage
+from utils.db import insert_gpu_log, insert_user_gpu_log
 import daemon
 from daemon import pidfile
 
@@ -49,8 +49,36 @@ def log_gpu_stats():
     else:
         logging.error(f"Failed to get GPU stats: {gpu_data}")
 
+def log_user_gpu_usage():
+    """Get current user GPU usage and log it to the database."""
+    success, user_data = get_user_gpu_usage()
+    if success and isinstance(user_data, list):
+        for user in user_data:
+            try:
+                username = user.get('username')
+                gpu_memory_mib = user.get('gpu_memory_mib', 0)
+                gpu_memory_percentage = user.get('gpu_memory_percentage', 0)
+                
+                # Log the values
+                insert_user_gpu_log(
+                    username=username,
+                    gpu_memory_mib=gpu_memory_mib,
+                    gpu_memory_percentage=gpu_memory_percentage
+                )
+                logging.info(f"Logged user GPU usage for {username}: Memory={gpu_memory_mib}MiB ({gpu_memory_percentage}%)")
+            except Exception as e:
+                logging.error(f"Error logging user GPU usage: {str(e)}")
+                logging.error(f"User data received: {user}")  # Added to debug data structure
+    else:
+        logging.error(f"Failed to get user GPU usage: {user_data}")
+
+def log_all_stats():
+    """Log both GPU stats and user GPU usage."""
+    log_gpu_stats()
+    log_user_gpu_usage()
+
 def main():
-    """Main loop to periodically log GPU stats."""
+    """Main loop to periodically log GPU stats and user GPU usage."""
     setup_logging()
     interval = 300  # 5 minutes in seconds
     
@@ -60,7 +88,7 @@ def main():
     
     while True:
         try:
-            log_gpu_stats()
+            log_all_stats()
             time.sleep(interval)
         except KeyboardInterrupt:
             logging.info("GPU logger stopped by user.")
