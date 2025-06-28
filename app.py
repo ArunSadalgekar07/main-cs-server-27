@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()  # This will load variables from a .env file if present
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from utils.shell_ops import create_user, delete_user, list_users, get_inactive_users, get_gpu_stats, get_cpu_live_info, get_user_gpu_usage  # Add new imports
 import pandas as pd
@@ -24,8 +27,10 @@ def status():
 # Login Page (Moved to /login)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    admin_user = os.environ.get('ACCESSGRID_ADMIN_USER', 'admin')
+    admin_pass = os.environ.get('ACCESSGRID_ADMIN_PASS', 'admin')
     if request.method == 'POST':
-        if request.form['username'] == 'admin' and request.form['password'] == 'admin':
+        if request.form['username'] == admin_user and request.form['password'] == admin_pass:
             session['logged_in'] = True
             return redirect(url_for('display'))  # Redirect to the display page
         else:
@@ -384,7 +389,7 @@ def gpu_status():
 
 # Workstation info for GPU status aggregation
 WORKSTATIONS = [
-    {"name": "CS-1",   "url": "http://127.0.0.1:5000/api/gpu_status"},
+    {"name": "CS-1",   "url": "http://172.0.16.27:5000/api/gpu_status"},
     {"name": "CS-2",   "url": "http://172.0.16.29:5000/api/gpu_status"},
     {"name": "MECH",   "url": "http://172.0.16.26:5000/api/gpu_status"},
     {"name": "EC",     "url": "http://172.0.16.25:5000/api/gpu_status"},
